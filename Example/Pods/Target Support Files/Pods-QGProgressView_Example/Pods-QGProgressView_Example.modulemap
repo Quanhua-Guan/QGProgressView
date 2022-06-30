@@ -1,0 +1,6 @@
+framework module Pods_QGProgressView_Example {
+  umbrella header "Pods-QGProgressView_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

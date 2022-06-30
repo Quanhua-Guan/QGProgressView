@@ -1,0 +1,6 @@
+framework module QGProgressView {
+  umbrella header "QGProgressView-umbrella.h"
+
+  export *
+  module * { export * }
+}
