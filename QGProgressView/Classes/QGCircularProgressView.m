@@ -6,6 +6,7 @@
 //
 
 #import "QGCircularProgressView.h"
+#import <CoreText/CoreText.h>>
 
 @interface QGCircularProgressView ()
 
@@ -16,6 +17,9 @@
 
 /// 进度条前景
 @property (nonatomic, strong) CAShapeLayer *progressLayer;
+
+/// 进度条文字
+@property (nonatomic, strong) UILabel *progressLabel;
 
 @end
 
@@ -47,6 +51,13 @@
     _progress = 0.3;
     _progressTintColor = UIColor.whiteColor;
     _trackTintColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+    UIFontDescriptor *fontDescriptor = [UIFontDescriptor fontDescriptorWithFontAttributes:@{
+        UIFontDescriptorFeatureSettingsAttribute: @{
+            UIFontFeatureTypeIdentifierKey: @(kNumberSpacingType),
+            UIFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector),
+        },
+    }];
+    _progressTextFont = [UIFont fontWithDescriptor:fontDescriptor size:13];
     
     _progressTrackLayer = CAShapeLayer.layer;
     _progressTrackLayer.fillColor = UIColor.clearColor.CGColor;
@@ -59,6 +70,14 @@
     _progressLayer.strokeEnd = _progress;
     _progressLayer.lineCap = kCALineCapRound;
     [self.layer addSublayer:_progressLayer];
+    
+    _progressLabel = [[UILabel alloc] init];
+    _progressLabel.backgroundColor = UIColor.clearColor;
+    _progressLabel.textAlignment = NSTextAlignmentCenter;
+    _progressLabel.font = _progressTextFont;
+    _progressLabel.textColor = _progressTintColor;
+    _progressLabel.hidden = !_showProgressText;
+    [self addSubview:_progressLabel];
 }
 
 - (void)layoutSubviews {
@@ -81,8 +100,10 @@
         _progressTrackLayer.lineWidth = _lineWidth;
         _progressTrackLayer.path = bezierPath.CGPath;
         _progressTrackLayer.bounds = CGRectMake(0, 0, minSide, minSide);
+        
     }
     
+    _progressLabel.frame = self.bounds;
     _progressTrackLayer.position = _progressLayer.position = CGPointMake(size.width / 2, size.height / 2);
 }
 
@@ -91,6 +112,7 @@
 - (void)setProgress:(CGFloat)progress {
     _progress = MIN(MAX(0, progress), 1.0);
     _progressLayer.strokeEnd = _progress;
+    _progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
     [self setNeedsLayout];
 }
 
@@ -102,11 +124,22 @@
 - (void)setProgressTintColor:(UIColor *)progressTintColor {
     _progressTintColor = progressTintColor;
     _progressLayer.strokeColor = progressTintColor.CGColor;
+    _progressLabel.textColor = progressTintColor;
 }
 
 - (void)setTrackTintColor:(UIColor *)trackTintColor {
     _trackTintColor = trackTintColor;
     _progressTrackLayer.strokeColor = trackTintColor.CGColor;
+}
+
+- (void)setShowProgressText:(BOOL)showProgressText {
+    _showProgressText = showProgressText;
+    _progressLabel.hidden = !showProgressText;
+}
+
+- (void)setProgressTextFont:(UIFont *)progressTextFont {
+    _progressTextFont = progressTextFont;
+    _progressLabel.font = _progressTextFont;
 }
 
 @end

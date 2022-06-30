@@ -24,6 +24,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// 进度条轨道背景色, 30%透明度白色
 @property(nonatomic, strong, nullable) UIColor* trackTintColor;
 
+/// 是否展示进度文本, 默认: NO
+@property (nonatomic, assign) BOOL showProgressText;
+
+/// 进度文本字号, 默认字号 13, Regular
+@property (nonatomic, strong) UIFont *progressTextFont;
+
 @end
 
 NS_ASSUME_NONNULL_END
