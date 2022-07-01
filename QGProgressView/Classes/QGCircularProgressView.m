@@ -107,7 +107,8 @@
     [self.layer addSublayer:_loadingLayer];
     
     _loadingDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(handleDisplayLink:)];
-    [_loadingDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+    [_loadingDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:UITrackingRunLoopMode];
+    [_loadingDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSDefaultRunLoopMode];
     _loadingDisplayLink.paused = YES;
 }
 

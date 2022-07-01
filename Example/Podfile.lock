@@ -1,5 +1,5 @@
 PODS:
-  - QGProgressView (0.1.1)
+  - QGProgressView (0.1.2)
 
 DEPENDENCIES:
   - QGProgressView (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  QGProgressView: 466c3a98a29e7e5acd498e64c6cd9d3d5beab5f4
+  QGProgressView: a505d2288790eb653915e0a873444955d6870320
 
 PODFILE CHECKSUM: 800b37a34bf197defc51c7394a06b8cc9161da81
 
