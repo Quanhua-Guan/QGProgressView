@@ -23,13 +23,14 @@
     
     QGCircularProgressView *progressView = [[QGCircularProgressView alloc] initWithFrame:CGRectMake(150, 200, 54, 54)];
     progressView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+    //progressView.progressTintColor = UIColor.purpleColor;
     [self.view addSubview:progressView];
         
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         __block BOOL up = YES;
         [[NSTimer scheduledTimerWithTimeInterval:0.1 repeats:YES block:^(NSTimer * _Nonnull timer) {
             progressView.progress += (up ? 1 : -1) * 0.01;
-            
+
             if (progressView.progress >= 1.0 || progressView.progress <= 0.0) {
                 up = !up;
             }
@@ -39,6 +40,7 @@
     // create loading background image
     CAGradientLayer *gradientLayer = CAGradientLayer.layer;
     gradientLayer.frame = CGRectMake(0, 0, 54, 54);
+    gradientLayer.shadowColor = UIColor.clearColor.CGColor;
     if (@available(iOS 12.0, *)) {
         gradientLayer.type = kCAGradientLayerConic;
     } else {
@@ -53,8 +55,8 @@
     ];
     gradientLayer.colors = @[
         (__bridge id) ((UIColor.whiteColor).CGColor),
-        (__bridge id) ((UIColor.clearColor).CGColor),
-        (__bridge id) UIColor.clearColor.CGColor,
+        (__bridge id) (([UIColor.whiteColor colorWithAlphaComponent:0.1]).CGColor),
+        (__bridge id) [UIColor.whiteColor colorWithAlphaComponent:0].CGColor,
     ];
     
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(54, 54), NO, UIScreen.mainScreen.scale);

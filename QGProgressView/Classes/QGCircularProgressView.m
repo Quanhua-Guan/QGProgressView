@@ -6,7 +6,29 @@
 //
 
 #import "QGCircularProgressView.h"
-#import <CoreText/CoreText.h>>
+#import <CoreText/CoreText.h>
+
+@interface UIImage (GDProgressView)
+@end
+@implementation UIImage (GDProgressView)
+
+- (UIImage *)gdpv_tintedImageWithColor:(UIColor *)tintColor
+{
+    UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
+    
+    [tintColor setFill];
+    CGRect bounds = CGRectMake(0, 0, self.size.width, self.size.height);
+    UIRectFill(bounds);
+    
+    [self drawInRect:bounds blendMode:kCGBlendModeDestinationIn alpha:1.0f];
+
+    UIImage *tintedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return tintedImage;
+}
+
+@end
 
 @interface QGCircularProgressView ()
 
@@ -28,6 +50,9 @@
 @property (nonatomic, strong) CAShapeLayer *loadingLayerMask;
 
 #pragma mark - Other
+
+/// 提示用户正在加载中的图片
+@property (nonatomic, strong) UIImage *loadingImage;
 
 /// 旋转加载中提示图层的定时器
 @property (nonatomic, strong) CADisplayLink *loadingDisplayLink;
@@ -101,8 +126,8 @@
     _loadingLayer.mask = _loadingLayerMask;
     NSString *bundlePath = [[NSBundle bundleForClass:self.class] pathForResource:@"QGProgressView" ofType:@"bundle"];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    UIImage *loadingImage = [UIImage imageNamed:@"loading_background.png" inBundle:bundle compatibleWithTraitCollection:nil];
-    _loadingLayer.contents = (__bridge id)loadingImage.CGImage;
+    _loadingImage = [UIImage imageNamed:@"loading_background.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    _loadingLayer.contents = (__bridge id)_loadingImage.CGImage;
     _loadingLayer.contentsGravity = kCAGravityResize;
     [self.layer addSublayer:_loadingLayer];
     
@@ -111,6 +136,8 @@
     [_loadingDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSDefaultRunLoopMode];
     _loadingDisplayLink.paused = YES;
 }
+
+#pragma mark - Layout Subviews
 
 - (void)layoutSubviews {
     [super layoutSubviews];
@@ -155,7 +182,7 @@
 #pragma mark - DisplayLink
 
 - (void)handleDisplayLink:(CADisplayLink *)displayLink {
-    CGFloat angle = displayLink.duration / 1.0 * M_PI * 2.0;
+    CGFloat angle = displayLink.duration * M_PI * 2.0;
     CATransform3D transorm = CATransform3DRotate(_loadingLayer.transform, angle, 0, 0, 1);
     _loadingLayer.transform = transorm;
 }
@@ -194,6 +221,9 @@
     _progressTintColor = progressTintColor;
     _progressLayer.strokeColor = progressTintColor.CGColor;
     _progressLabel.textColor = progressTintColor;
+    
+    _loadingImage = [_loadingImage gdpv_tintedImageWithColor:progressTintColor];
+    _loadingLayer.contents = (__bridge id)_loadingImage.CGImage;
 }
 
 - (void)setTrackTintColor:(UIColor *)trackTintColor {
