@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'QGProgressView'
-  s.version          = '0.1.1'
+  s.version          = '0.1.2'
   s.summary          = 'A short description of QGProgressView.'
 
 # This description is used to generate tags and improve search results.
@@ -30,9 +30,9 @@ A circular progress view, simple but good.
 
   s.source_files = 'QGProgressView/Classes/**/*'
   
-  # s.resource_bundles = {
-  #   'QGProgressView' => ['QGProgressView/Assets/*.png']
-  # }
+  s.resource_bundles = {
+    'QGProgressView' => ['QGProgressView/Assets/*.png']
+  }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'QuartzCore'

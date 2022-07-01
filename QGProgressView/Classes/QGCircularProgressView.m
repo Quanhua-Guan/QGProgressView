@@ -21,6 +21,17 @@
 /// 进度条文字
 @property (nonatomic, strong) UILabel *progressLabel;
 
+/// 提示用户正在加载中的图层
+@property (nonatomic, strong) CALayer *loadingLayer;
+
+/// 提示用户正在加载中的图层的遮罩图层 (mask)
+@property (nonatomic, strong) CAShapeLayer *loadingLayerMask;
+
+#pragma mark - Other
+
+/// 旋转加载中提示图层的定时器
+@property (nonatomic, strong) CADisplayLink *loadingDisplayLink;
+
 @end
 
 @implementation QGCircularProgressView
@@ -48,7 +59,7 @@
 - (void)setup {
     self.backgroundColor = UIColor.clearColor;
     _lineWidth = 6.0;
-    _progress = 0.3;
+    _progress = 0.0;
     _progressTintColor = UIColor.whiteColor;
     _trackTintColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
     UIFontDescriptor *fontDescriptor = [UIFontDescriptor fontDescriptorWithFontAttributes:@{
@@ -78,6 +89,26 @@
     _progressLabel.textColor = _progressTintColor;
     _progressLabel.hidden = !_showProgressText;
     [self addSubview:_progressLabel];
+    
+    _loadingLayerMask = CAShapeLayer.layer;
+    _loadingLayerMask.fillColor = UIColor.clearColor.CGColor;
+    _loadingLayerMask.strokeColor = UIColor.whiteColor.CGColor;
+    _loadingLayerMask.strokeStart = 0.125;
+    _loadingLayerMask.strokeEnd = 1;
+    _loadingLayerMask.lineCap = kCALineCapRound;
+    
+    _loadingLayer = CALayer.layer;
+    _loadingLayer.mask = _loadingLayerMask;
+    NSString *bundlePath = [[NSBundle bundleForClass:self.class] pathForResource:@"QGProgressView" ofType:@"bundle"];
+    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+    UIImage *loadingImage = [UIImage imageNamed:@"loading_background.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    _loadingLayer.contents = (__bridge id)loadingImage.CGImage;
+    _loadingLayer.contentsGravity = kCAGravityResize;
+    [self.layer addSublayer:_loadingLayer];
+    
+    _loadingDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(handleDisplayLink:)];
+    [_loadingDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+    _loadingDisplayLink.paused = YES;
 }
 
 - (void)layoutSubviews {
@@ -101,10 +132,31 @@
         _progressTrackLayer.path = bezierPath.CGPath;
         _progressTrackLayer.bounds = CGRectMake(0, 0, minSide, minSide);
         
+        _loadingLayer.bounds = CGRectMake(0, 0, minSide + _lineWidth, minSide + _lineWidth);
+        
+        _loadingLayerMask.frame = CGRectMake(_lineWidth / 2, _lineWidth / 2, minSide, minSide);
+        _loadingLayerMask.lineWidth = _lineWidth;
+        _loadingLayerMask.path = bezierPath.CGPath;
     }
     
     _progressLabel.frame = self.bounds;
-    _progressTrackLayer.position = _progressLayer.position = CGPointMake(size.width / 2, size.height / 2);
+    _loadingLayer.position = _progressTrackLayer.position = _progressLayer.position = CGPointMake(size.width / 2, size.height / 2);
+    
+    _loadingDisplayLink.paused = _progress > 0;
+}
+
+#pragma mark - Dealloc
+
+- (void)dealloc {
+    [_loadingDisplayLink invalidate];
+}
+
+#pragma mark - DisplayLink
+
+- (void)handleDisplayLink:(CADisplayLink *)displayLink {
+    CGFloat angle = displayLink.duration / 1.0 * M_PI * 2.0;
+    CATransform3D transorm = CATransform3DRotate(_loadingLayer.transform, angle, 0, 0, 1);
+    _loadingLayer.transform = transorm;
 }
 
 #pragma mark - Setters
@@ -114,6 +166,22 @@
     _progressLayer.strokeEnd = _progress;
     _progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
     [self setNeedsLayout];
+    
+    if (_progress == 0) {
+        if (_loadingDisplayLink.isPaused) {
+            _loadingDisplayLink.paused = NO;
+        }
+        _loadingLayer.hidden = NO;
+        _progressLayer.hidden = YES;
+        _progressLabel.hidden = YES;
+    } else {
+        if (!_loadingDisplayLink.paused) {
+            _loadingDisplayLink.paused = YES;
+        }
+        _loadingLayer.hidden = YES;
+        _progressLayer.hidden = NO;
+        _progressLabel.hidden = NO;
+    }
 }
 
 - (void)setLineWidth:(CGFloat)lineWidth {
