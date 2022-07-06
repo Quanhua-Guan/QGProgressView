@@ -193,7 +193,6 @@
     _progress = MIN(MAX(0, progress), 1.0);
     _progressLayer.strokeEnd = _progress;
     _progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
-    [self setNeedsLayout];
     
     if (_progress == 0) {
         if (_loadingDisplayLink.isPaused) {

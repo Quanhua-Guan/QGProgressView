@@ -9,5 +9,6 @@
 #define QGProgressView_h
 
 #import "QGCircularProgressView.h"
+#import "QGRectangleProgressView.h"
 
 #endif /* QGProgressView_h */
